@@ -27,6 +27,7 @@ class ChartJSHelper extends Helper
         'id' => 'chartjs',
         'width' => '200',
         'height' => '200',
+        'style' => ['max-height' => '500px'],
     ];
     
     protected $js = [];
@@ -39,13 +40,19 @@ class ChartJSHelper extends Helper
     public function start($id){
         $this->chartCount++;
         $this->id = $id;
-        $this->canvasOptions['id'] = $this->id;
+        $this->setCanvasOptions(['id' => $this->id, 'width' => 400, 'height' => 400, 'class' => 'chartjs'], true);
         $this->js = [];
         $this->data = [
             'datasets' => [],
             'labels' => []
         ];
         $this->options = [];
+    }
+    
+    public function setCanvasOptions($options = [], $clear = false){
+        $this->canvasOptions = $clear ?
+            $options :
+            array_merge($this->canvasOptions, $options);
     }
     
     protected function render($options = []){
@@ -57,8 +64,8 @@ class ChartJSHelper extends Helper
         $this->options = array_merge($this->options, $options);
         $id = $this->id;
         $jsStart = [];
-        $jsStart[] = "var data$id = JSON.parse('".json_encode($this->data)."');";
-        $jsStart[] = "var options$id = JSON.parse('".json_encode($this->options)."');";
+        $jsStart[] = "var data$id = ".json_encode($this->data).";";
+        $jsStart[] = "var options$id = ".json_encode($this->options).";";
         $jsStart[] = "var ctx$id = \"$id\";";
         
         $this->Html->scriptBlock(implode("\n", array_merge($jsStart, $this->js)), ['block' => true, 'type' => "text/javascript"]);
